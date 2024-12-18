@@ -1,4 +1,4 @@
-Here is the content formatted as a GitHub README file:
+
 
 ```markdown
 # Car Theft Analysis Report: New Zealand
