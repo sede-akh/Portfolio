@@ -1,206 +1,143 @@
+### Car Theft Analysis Report: New Zealand 🚗🔍  
 
-
-```markdown
-# Car Theft Analysis Report: New Zealand
-
-This report explores vehicle theft trends using SQL analysis, detailing data definitions, constraints, and methodologies. Insights include theft patterns by region, vehicle type, age, and temporal trends for informed decision-making.
+This repository delivers an in-depth analysis of vehicle theft patterns in New Zealand, utilizing SQL for data exploration and trend identification. The project investigates relationships between key data attributes and uncovers insights into theft patterns based on vehicle types, regional occurrences, manufacturing years, and time-based factors. Detailed methodologies and queries support findings aimed at improving theft prevention strategies and enhancing public safety efforts.  
 
 ---
 
-## 1. Data Dictionary
+### Key Features of the Analysis  
 
-The following tables were used for the analysis:
+#### 1. **Data Overview**  
+The analysis incorporates three relational tables—`stolen_vehicles`, `make_details`, and `locations`. Each table's structure and relationships are thoroughly explained to ensure clarity and facilitate replication. The data overview emphasizes critical aspects like stolen vehicle categories, theft locations, and reporting dates to build a solid analytical foundation.  
 
-| Table Name       | Column Name    | Data Type | Description                                       |
-|-------------------|----------------|-----------|---------------------------------------------------|
-| **stolen_vehicles** | vehicle_id     | INT       | Unique identifier for each stolen vehicle         |
-|                   | make_id        | INT       | Foreign key referencing vehicle make details      |
-|                   | location_id    | INT       | Foreign key referencing the locations table       |
-|                   | vehicle_type   | VARCHAR   | Type of the stolen vehicle (e.g., Stationwagon)   |
-|                   | model_year     | INT       | Manufacturing year of the stolen vehicle          |
-|                   | date_stolen    | DATE      | Date when the vehicle was reported stolen         |
-| **make_details**   | make_id        | INT       | Unique identifier for vehicle makes               |
-|                   | make_name      | VARCHAR   | Name of the vehicle's manufacturer (e.g., Toyota) |
-| **locations**      | location_id    | INT       | Unique identifier for locations                   |
-|                   | region         | VARCHAR   | Region where the vehicle was stolen (e.g., Auckland) |
-|                   | population     | INT       | Population of the region                          |
-|                   | density        | FLOAT     | Population density of the region                 |
+#### 2. **Data Integrity and Constraints**  
+- **Primary Keys**: Guarantee the uniqueness of identifiers such as `vehicle_id`, `make_id`, and `location_id`.  
+- **Foreign Keys**: Maintain table relationships, e.g., linking `make_id` in the `stolen_vehicles` table to the `make_details` table.  
+- **NOT NULL Constraints**: Ensure key fields like `make_name`, `region`, and `date_stolen` always contain data.  
+These constraints protect data integrity, establish reliable relationships, and reduce errors in analysis.  
 
----
+#### 3. **Approach and Methodology**  
+The study adopts a structured process to derive actionable insights:  
+- **Data Preparation**: Data was extracted from the three primary tables.  
+- **Exploratory Analysis**: Patterns were analyzed across timeframes, locations, vehicle types, manufacturers, and vehicle ages.  
+- **SQL Queries**: The analysis uses queries with techniques like `GROUP BY`, `INNER JOIN`, and aggregation functions (`COUNT`, `AVG`). More advanced SQL concepts, including Common Table Expressions (CTEs) and stored procedures, were also employed.  
 
-## 2. Constraints and Their Usage
+#### 4. **SQL Query Highlights and Observations**  
+SQL queries were crafted to answer specific questions related to vehicle theft trends.  
 
-- **Primary Key Constraints**: Ensures the uniqueness of records.
-  - `vehicle_id` in `stolen_vehicles`
-  - `make_id` in `make_details`
-  - `location_id` in `locations`
-  
-- **Foreign Key Constraints**: Establishes relationships between tables.
-  - `make_id` in `stolen_vehicles` references `make_details`
-  - `location_id` in `stolen_vehicles` references `locations`
-  
-- **NOT NULL Constraints**: Ensures mandatory fields like `make_name`, `region`, and `date_stolen` cannot be null.
-
-These constraints maintain data integrity, ensure accurate relationships, and prevent incomplete records.
+**1. Annual Stolen Vehicle Totals**  
+Query:  
+```sql  
+SELECT COUNT(vehicle_id) AS Number_cars_stolen,  
+       YEAR(date_stolen) AS Year_stolen  
+FROM stolen_vehicles  
+GROUP BY YEAR(date_stolen);  
+```  
+Observation:  
+- **2021**: 1,668 vehicles reported stolen.  
+- **2022**: 2,885 vehicles stolen, a 73% rise.  
 
 ---
 
-## 3. Methodology
-
-### Steps:
-1. **Data Collection**: 
-   - Data was extracted from the `stolen_vehicles`, `make_details`, and `locations` tables.
-   
-2. **Exploratory Data Analysis**: 
-   - Analyzed car theft patterns by year, day of the week, vehicle type, make, region, and vehicle age.
-   
-3. **SQL Queries**: 
-   - Developed queries using `GROUP BY`, `INNER JOIN`, and aggregation functions like `COUNT()` and `AVG()`.
-
----
-
-## 4. Explanation of Queries and Findings
-
-### 1. Total Number of Stolen Cars Each Year
-```sql
-SELECT COUNT(vehicle_id) AS Number_cars_stolen,
-       YEAR(date_stolen) AS Years_stolen
-FROM stolen_vehicles
-GROUP BY YEAR(date_stolen);
-```
-**Findings**:
-- **2021**: 1,668 cars stolen
-- **2022**: 2,885 cars stolen (73% increase).
+**2. Theft Trends by Weekday**  
+Query:  
+```sql  
+SELECT DATENAME(WEEKDAY, date_stolen) AS Day_of_Week,  
+       COUNT(vehicle_id) AS Theft_Count  
+FROM stolen_vehicles  
+GROUP BY DATENAME(WEEKDAY, date_stolen)  
+ORDER BY Theft_Count DESC;  
+```  
+Observation:  
+- Mondays had the most thefts (767).  
+- Saturdays had the fewest (577).  
 
 ---
 
-### 2. Car Theft by Day of the Week
-```sql
-SELECT DATENAME(WEEKDAY, date_stolen) AS DayOfWeekStolen,
-       COUNT(vehicle_id) AS Theft_Count
-FROM stolen_vehicles
-GROUP BY DATENAME(WEEKDAY, date_stolen)
-ORDER BY Theft_Count DESC;
-```
-**Findings**:
-- Highest thefts: **Monday** (767 incidents).
-- Lowest thefts: **Saturday** (577 incidents).
+**3. Vehicle Types Most Commonly Stolen**  
+Query:  
+```sql  
+SELECT vehicle_type,  
+       COUNT(vehicle_type) AS Count_Stolen  
+FROM stolen_vehicles  
+GROUP BY vehicle_type  
+ORDER BY COUNT(vehicle_type) DESC;  
+```  
+Observation:  
+- Stationwagons were stolen most frequently (945 instances).  
+- Convertibles were the least targeted (12 instances).  
 
 ---
 
-### 3. Vehicle Types Most Frequently Stolen
-```sql
-SELECT vehicle_type,
-       COUNT(vehicle_type) AS NumberTimesStolen
-FROM stolen_vehicles
-GROUP BY vehicle_type
-ORDER BY COUNT(vehicle_type) DESC;
-```
-**Findings**:
-- Most targeted: **Stationwagons** (945 thefts).
-- Least targeted: **Convertible** (12 thefts).
+**4. Popular Vehicle Makes Among Thieves**  
+Query:  
+```sql  
+SELECT MKD.make_name,  
+       COUNT(MKD.make_name) AS Theft_Count  
+FROM stolen_vehicles AS STV  
+INNER JOIN make_details AS MKD ON STV.make_id = MKD.make_id  
+GROUP BY MKD.make_name  
+ORDER BY Theft_Count DESC;  
+```  
+Observation:  
+- Toyota was the most frequently stolen vehicle make, with 716 reported incidents.  
 
 ---
 
-### 4. Most Frequently Stolen Vehicle Makes
-```sql
-SELECT MKD.make_name,
-       COUNT(MKD.make_name) AS VehicleMakeCount
-FROM stolen_vehicles AS STV
-INNER JOIN make_details AS MKD ON STV.make_id = MKD.make_id
-GROUP BY MKD.make_name
-ORDER BY VehicleMakeCount DESC;
-```
-**Findings**:
-- Most stolen: **Toyota** (716 incidents).
+**5. Regional Theft Analysis**  
+Query:  
+```sql  
+SELECT LCT.region,  
+       COUNT(*) AS Theft_Count  
+FROM locations AS LCT  
+INNER JOIN stolen_vehicles AS STV ON LCT.location_id = STV.location_id  
+GROUP BY LCT.region  
+ORDER BY Theft_Count DESC;  
+```  
+Observation:  
+- Auckland recorded the highest number of thefts (1,638 vehicles).  
 
 ---
 
-### 5. Theft Patterns by Region
-```sql
-SELECT LCT.region,
-       COUNT(*) AS VehicleMakeCount
-FROM locations AS LCT
-INNER JOIN stolen_vehicles AS STV ON LCT.location_id = STV.location_id
-GROUP BY LCT.region
-ORDER BY VehicleMakeCount DESC;
-```
-**Findings**:
-- Highest thefts: **Auckland** (1,638 incidents).
+**6. Average Age of Stolen Vehicles**  
+Query:  
+```sql  
+WITH VehicleAge AS (  
+    SELECT model_year,  
+           YEAR(GETDATE()) - model_year AS Age  
+    FROM stolen_vehicles  
+)  
+SELECT AVG(Age) AS Average_Age  
+FROM VehicleAge;  
+```  
+Observation:  
+- The average age of stolen vehicles was 18 years, suggesting older vehicles are more vulnerable.  
 
 ---
 
-### 6. Average Age of Stolen Vehicles
-Using a Common Table Expression (CTE):
-```sql
-WITH CarAge AS (
-    SELECT model_year,
-           YEAR(GETDATE()) - model_year AS CurrentCarAge
-    FROM stolen_vehicles
-)
-SELECT AVG(CurrentCarAge) AS AverageCarAge
-FROM CarAge;
-```
-**Findings**:
-- Average age of stolen vehicles: **18 years**.
+### Key Insights  
+
+1. **Time-Based Trends**:  
+   - Theft incidents peaked on Mondays and declined on Saturdays.  
+2. **Vehicle Susceptibility**:  
+   - Stationwagons were the most targeted vehicle type.  
+   - Toyota was the leading manufacturer in theft cases, particularly older models.  
+3. **Vulnerable Vehicles**:  
+   - Older vehicles (average age 18–21 years) are more susceptible to theft due to outdated security measures.  
+4. **Regional Analysis**:  
+   - Auckland accounted for the majority of vehicle thefts, far surpassing other regions.  
 
 ---
 
-### 7. Vehicle Age and Theft Count by Vehicle Type
-```sql
-SELECT vehicle_type,
-       AVG(YEAR(GETDATE()) - model_year) AS AverageCarAge,
-       COUNT(vehicle_type) AS No_Times_Stolen
-FROM stolen_vehicles
-GROUP BY vehicle_type
-ORDER BY No_Times_Stolen DESC;
-```
-**Findings**:
-- **Stationwagons** (21 years old on average) are the most frequently stolen.
+### Recommendations  
 
----
+1. **Security Enhancements for Older Vehicles**:  
+   - Promote the use of modern anti-theft systems and immobilizers for vehicles with outdated features.  
+2. **Strategic Policing and Surveillance**:  
+   - Increase monitoring and enforcement in high-risk areas like Auckland.  
+3. **Awareness Campaigns**:  
+   - Educate the public about theft patterns and preventive measures, particularly for high-risk vehicle types and regions.  
+4. **Policy Interventions**:  
+   - Use data insights to guide resource allocation and policy-making efforts for crime prevention.  
 
-### 8. Stored Procedure to Fetch Stolen Vehicle Details
-```sql
-CREATE PROCEDURE Theft_facts
-    @Vehicle_id INT
-AS
-BEGIN
-    SELECT vehicle_id,
-           make_name,
-           vehicle_type,
-           model_year,
-           LT.region AS REGION_STOLEN,
-           country,
-           date_stolen
-    FROM stolen_vehicles STV
-    INNER JOIN locations LT ON STV.location_id = LT.location_id
-    INNER JOIN make_details MKD ON STV.make_id = MKD.make_id
-    WHERE vehicle_id = @Vehicle_id;
-END;
 
-EXEC Theft_facts @Vehicle_id = 10;
-```
-**Benefits**:
-- Controlled access to vehicle details.
-- Flexibility and enhanced database security.
-
----
-
-## 5. Key Insights and Conclusions
-
-1. **Temporal Analysis**: Theft rates peak on Mondays and are lowest on Saturdays.
-2. **Vehicle Types**: Stationwagons and Saloons are prime targets.
-3. **Vehicle Age**: Older vehicles (average 18-21 years) are more prone to theft.
-4. **Regional Patterns**: Auckland experiences the most thefts.
-5. **Most Stolen Makes**: Toyota dominates, with older models being the primary focus.
-
----
-
-## 6. Recommendations
-
-- Implement advanced security measures for older vehicles.
-- Increase surveillance and awareness in Auckland.
-- Monitor high-risk days like Mondays for preventive action.
-```
-
+This project highlights the value of data-driven strategies in tackling vehicle theft. By leveraging SQL and well-defined methodologies, it offers actionable insights for improving vehicle security and reducing crime. 🚀  
